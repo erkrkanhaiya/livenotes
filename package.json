@@ -1,0 +1,48 @@
+{
+  "name": "google-notes-extension",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Chrome Extension for Google Notes with React, Firebase, and mobile API support",
+  "scripts": {
+    "dev": "vite",
+    "dev:web": "vite --mode web",
+    "build": "npm run generate:manifest && tsc -b && vite build",
+    "build:extension": "npm run generate:manifest && vite build --mode extension",
+    "build:web": "tsc -b && vite build --mode web",
+    "generate:manifest": "node scripts/generate-manifest.cjs",
+    "lint": "eslint .",
+    "preview": "vite preview",
+    "preview:web": "vite preview --mode web"
+  },
+  "dependencies": {
+    "@types/react-router-dom": "^5.3.3",
+    "appwrite": "^14.0.1",
+    "clsx": "^2.0.0",
+    "date-fns": "^2.30.0",
+    "firebase": "^10.7.1",
+    "lucide-react": "^0.294.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "react-router-dom": "^7.9.5"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.1",
+    "@types/chrome": "^0.0.251",
+    "@types/node": "^24.10.0",
+    "@types/react": "^19.2.2",
+    "@types/react-dom": "^19.2.2",
+    "@vitejs/plugin-react": "^5.1.0",
+    "autoprefixer": "^10.4.16",
+    "dotenv": "^17.2.3",
+    "eslint": "^9.39.1",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "eslint-plugin-react-refresh": "^0.4.24",
+    "globals": "^16.5.0",
+    "postcss": "^8.4.32",
+    "tailwindcss": "^3.3.6",
+    "typescript": "~5.9.3",
+    "typescript-eslint": "^8.46.3",
+    "vite": "^7.2.2"
+  }
+}

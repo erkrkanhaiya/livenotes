@@ -1,0 +1,79 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Notes collection rules
+    match /notes/{noteId} {
+      // Users can only access their own notes
+      allow read, write: if request.auth != null && 
+                         request.auth.uid == resource.data.userId;
+      
+      // Allow creation if user is authenticated and userId matches
+      allow create: if request.auth != null && 
+                    request.auth.uid == request.resource.data.userId;
+    }
+    
+    // Shared notes collection rules
+    match /sharedNotes/{shareId} {
+      // Public notes readable by anyone, private notes require auth
+      allow read: if resource.data.shareType == 'public' || request.auth != null;
+      
+      // Only the owner can create shared notes
+      allow create: if request.auth != null &&
+                    request.auth.uid == request.resource.data.ownerId;
+      
+      // Updates allowed for owner, or collaborators on private/community notes
+      allow update: if request.auth != null &&
+                    request.resource.data.ownerId == resource.data.ownerId &&
+                    request.resource.data.shareId == resource.data.shareId &&
+                    (
+                      request.auth.uid == resource.data.ownerId ||
+                      (resource.data.shareType == 'private' && resource.data.allowEditing != false) ||
+                      (resource.data.isCommunity == true)
+                    );
+      
+      // Only owner can delete shared note
+      allow delete: if request.auth != null &&
+                    request.auth.uid == resource.data.ownerId;
+    }
+    
+    // Groups collection rules
+    match /groups/{groupId} {
+      // Users can only access their own groups
+      allow read, write: if request.auth != null && 
+                         request.auth.uid == resource.data.ownerId;
+      
+      // Allow creation if user is authenticated and ownerId matches
+      allow create: if request.auth != null && 
+                    request.auth.uid == request.resource.data.ownerId;
+    }
+    
+    // Shared groups collection rules
+    match /sharedGroups/{sharedGroupId} {
+      // Public groups readable by anyone, private groups require auth
+      allow read: if resource.data.shareType == 'public' || request.auth != null;
+      
+      // Only the owner can create shared groups
+      allow create: if request.auth != null &&
+                    request.auth.uid == request.resource.data.ownerId;
+      
+      // Updates allowed for owner, or collaborators on private groups
+      allow update: if request.auth != null &&
+                    request.resource.data.ownerId == resource.data.ownerId &&
+                    request.resource.data.shareId == resource.data.shareId &&
+                    (
+                      request.auth.uid == resource.data.ownerId ||
+                      (resource.data.shareType == 'private' && resource.data.allowEditing != false)
+                    );
+      
+      // Only owner can delete shared group
+      allow delete: if request.auth != null &&
+                    request.auth.uid == resource.data.ownerId;
+    }
+    
+    // Default rule - deny all other access
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

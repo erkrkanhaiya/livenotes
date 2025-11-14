@@ -1,0 +1,82 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom extension styles */
+body.extension-mode {
+  width: 500px;
+  height: 700px;
+  margin: 0;
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+/* Web mode - full responsive */
+body.web-mode {
+  width: 100%;
+  min-height: 100vh;
+  margin: 0;
+  font-family: 'Inter', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  body.web-mode {
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
+  
+  /* Prevent text size adjustment on iOS */
+  * {
+    -webkit-text-size-adjust: 100%;
+  }
+  
+  /* Better touch targets */
+  button, a, input, select, textarea {
+    min-height: 44px; /* iOS recommended touch target */
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 4px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-gray-100 dark:bg-gray-800;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-gray-400 dark:bg-gray-600 rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-gray-500 dark:bg-gray-500;
+}
+
+/* Animation classes */
+@layer utilities {
+  .animate-float {
+    animation: float 3s ease-in-out infinite;
+  }
+  
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-5px); }
+  }
+
+  .animate-slide-up {
+    animation: slideUp 0.3s ease-out;
+  }
+  
+  @keyframes slideUp {
+    from {
+      transform: translateY(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+}
