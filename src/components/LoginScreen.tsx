@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { StickyNote, Eye, EyeOff } from 'lucide-react';
 import { getFirebaseErrorMessage } from '../utils/firebaseErrors';
+import { Link } from 'react-router-dom';
 
 const LoginScreen: React.FC = () => {
   const { signInWithGoogle, signInWithEmail, signUpWithEmail, signInAsGuest, isLoading } = useAuth();
@@ -546,6 +547,16 @@ const LoginScreen: React.FC = () => {
               </p>
             </div>
           )}
+
+          {/* Privacy Policy Link */}
+          <div className="mt-6 text-center">
+            <Link
+              to="/privacy-policy"
+              className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 text-xs font-medium underline hover:no-underline transition-colors"
+            >
+              Privacy Policy
+            </Link>
+          </div>
         </div>
 
       </div>

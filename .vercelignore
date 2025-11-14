@@ -1,0 +1,15 @@
+node_modules
+dist
+.vercel
+.git
+*.log
+.env.local
+.env.*.local
+nextjs
+scripts
+create_icons.sh
+tsconfig*.json
+eslint.config.js
+postcss.config.js
+tailwind.config.js
+

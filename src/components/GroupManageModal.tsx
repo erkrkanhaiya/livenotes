@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, Plus, Trash2, FileText, Users, Settings } from 'lucide-react';
 import type { Group, Note } from '../types';
-import GroupsService from '../services/groupsService';
+// import GroupsService from '../services/groupsService';
 
 interface GroupManageModalProps {
   group: Group;

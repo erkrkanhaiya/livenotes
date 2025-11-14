@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Share2, Copy, Check, Users, Settings } from 'lucide-react';
+import { X, Share2, Copy, Check, Users } from 'lucide-react';
 import type { Group } from '../types';
 import GroupsService from '../services/groupsService';
 
@@ -303,7 +303,7 @@ const GroupShareModal: React.FC<GroupShareModalProps> = ({
                       <div className="flex items-center space-x-2">
                         <select
                           value={collaborator.permission || 'edit'}
-                          onChange={(e) => handleUpdatePermission(collaborator.email, collaborator.permission)}
+                          onChange={(_e) => handleUpdatePermission(collaborator.email, collaborator.permission)}
                           className="text-xs px-2 py-1.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-gray-700 dark:text-gray-300 text-left"
                         >
                           <option value="view">View</option>

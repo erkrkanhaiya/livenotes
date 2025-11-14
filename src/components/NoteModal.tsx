@@ -19,7 +19,7 @@ interface NoteModalProps {
 }
 
 const NoteModal: React.FC<NoteModalProps> = ({ note, onClose }) => {
-  const { createNote, updateNote, groups, selectedGroupId } = useNotes();
+  const { createNote, updateNote, selectedGroupId } = useNotes();
   const { user } = useAuth();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');

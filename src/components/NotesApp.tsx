@@ -5,7 +5,7 @@ import { useTheme } from '../contexts/ThemeContext';
 import Header from './Header';
 import NotesList from './NotesList';
 import SharedNoteCard from './SharedNoteCard';
-import AddNoteButton from './AddNoteButton';
+// import AddNoteButton from './AddNoteButton';
 import NoteModal from './NoteModal';
 import SearchBar from './SearchBar';
 import FilterBar from './FilterBar';
@@ -14,7 +14,7 @@ import GroupList from './GroupList';
 import GroupModal from './GroupModal';
 import GroupShareModal from './GroupShareModal';
 import GroupsService from '../services/groupsService';
-import { FolderPlus, Plus, Menu, X, ExternalLink } from 'lucide-react';
+import { FolderPlus, Plus, ExternalLink } from 'lucide-react';
 import type { Note, Group } from '../types';
 
 const NotesApp: React.FC = () => {
@@ -32,10 +32,10 @@ const NotesApp: React.FC = () => {
     createGroup,
     updateGroup,
     deleteGroup,
-    shareGroup,
+    // shareGroup,
     refreshGroups,
-    addNoteToGroup,
-    removeNoteFromGroup,
+    // addNoteToGroup,
+    // removeNoteFromGroup,
     toggleGroupPin,
     leaveGroup,
   } = useNotes();

@@ -207,9 +207,9 @@ export class SharingService {
 
         // Include note if user is a collaborator
         if (isCollaborator) {
-          const collaborator = collaborators.find((c: any) => 
-            c.email === userEmail || c.email?.toLowerCase() === userEmail.toLowerCase()
-          );
+          // const collaborator = collaborators.find((c: any) => 
+          //   c.email === userEmail || c.email?.toLowerCase() === userEmail.toLowerCase()
+          // );
           
           console.log('✅ Adding shared note for collaborator:', docRef.id);
           sharedNotes.push({
@@ -773,7 +773,7 @@ export class SharingService {
       // Sync back to the original note if noteId exists
       if (noteId) {
         try {
-          const { notesService } = await import('./notesService');
+          // const { notesService } = await import('./notesService');
           const noteRef = doc(db, 'notes', noteId);
           const noteDocSnap = await getDoc(noteRef);
 

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNotes } from '../contexts/NotesContext';
 import { useAuth } from '../contexts/AuthContext';
-import { Pin, Trash2, MoreVertical, Users, Info, Calendar, Clock, RefreshCw, UserMinus, Globe, Share2, X, UserPlus, ChevronDown, ChevronUp, Edit2, Settings } from 'lucide-react';
+import { Pin, Trash2, MoreVertical, Users, Info, Calendar, Clock, RefreshCw, UserMinus, Globe, Share2, X, UserPlus, Settings } from 'lucide-react';
 // import { formatDistanceToNow } from 'date-fns';
 import type { Note, NoteColor, SharedNote } from '../types';
 import CommunityAvatars from './CommunityAvatars';
@@ -36,7 +36,7 @@ const NoteCard: React.FC<NoteCardProps> = ({ note, onEdit, animationDelay = 0 })
   const [isRefreshingCommunity, setIsRefreshingCommunity] = useState(false);
   const [isLeavingCommunity, setIsLeavingCommunity] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
-  const [showCollaborators, setShowCollaborators] = useState(false);
+  // const [showCollaborators, setShowCollaborators] = useState(false);
   const [showCollaboratorModal, setShowCollaboratorModal] = useState(false);
   const [sharedNoteData, setSharedNoteData] = useState<SharedNote | null>(null);
   const [isLoadingCollaborators, setIsLoadingCollaborators] = useState(false);

@@ -4,6 +4,7 @@ import { ThemeProvider } from './contexts/ThemeContext';
 import { NotesProvider } from './contexts/NotesContext';
 import MainApp from './components/MainApp';
 import SharedNoteView from './components/SharedNoteView';
+import PrivacyPolicy from './components/PrivacyPolicy';
 import './App.css';
 
 function App() {
@@ -12,7 +13,8 @@ function App() {
       <AuthProvider>
         <Router>
           <Routes>
-            {/* Shared note route - doesn't require NotesProvider */}
+            {/* Public routes - no authentication required */}
+            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
             <Route path="/share/:shareId" element={<SharedNoteView />} />
             
             {/* Main app route - requires NotesProvider */}

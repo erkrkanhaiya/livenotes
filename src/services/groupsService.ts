@@ -346,14 +346,14 @@ export class GroupsService {
   static async shareGroup(
     groupId: string,
     shareType: 'public' | 'private',
-    ownerEmail: string
+    _ownerEmail: string
   ): Promise<{ shareId: string; shareType: 'public' | 'private' }> {
     if (!db) throw new Error('Firebase not initialized');
 
     const group = await this.getGroupById(groupId);
     if (!group) throw new Error('Group not found');
 
-    let shareId = group.shareId;
+    let shareId: string = group.shareId || this.generateShareId();
 
     // If group is already shared, update existing shared group document
     if (group.shareId) {
@@ -422,7 +422,7 @@ export class GroupsService {
       updatedAt: Timestamp.fromDate(new Date()),
     });
 
-    return { shareId, shareType };
+    return { shareId, shareType: shareType as 'public' | 'private' };
   }
 
   /**
