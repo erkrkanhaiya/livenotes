@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="description" content="Take notes, share with others, and collaborate in real-time" />
+    <meta name="theme-color" content="#4285F4" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="LiveNotes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <link rel="manifest" href="/manifest.web.json" />
+    <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
+    <title>LiveNotes - Web App</title>
+    <style>
+      /* Extension mode - fixed popup size */
+      body.extension-mode {
+        width: 400px;
+        height: 600px;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+      }
+      
+      /* Web mode - full screen */
+      body.web-mode {
+        margin: 0;
+        padding: 0;
+        width: 100vw;
+        height: 100vh;
+        overflow: auto;
+        background: #f5f5f5;
+      }
+      
+      #root {
+        width: 100%;
+        height: 100%;
+      }
+      
+      /* Default fallback - assume extension mode */
+      body {
+        width: 400px;
+        height: 600px;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+      }
+    </style>
+    <script type="module" crossorigin src="/assets/index-xaB_T4Wa.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-B81J2UXT.css">
+  </head>
+  <body>
+    <div id="root"></div>
+    <script>
+      // Detect if running as web app or extension
+      const isWebMode = window.location.protocol.startsWith('http');
+      const isExtensionMode = typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.id;
+      
+      if (isWebMode && !isExtensionMode) {
+        document.body.classList.add('web-mode');
+        document.title = 'LiveNotes - Web App';
+        
+        // Register service worker for PWA
+        if ('serviceWorker' in navigator) {
+          window.addEventListener('load', () => {
+            navigator.serviceWorker.register('/sw.js')
+              .then((registration) => {
+                console.log('Service Worker registered:', registration);
+              })
+              .catch((error) => {
+                console.log('Service Worker registration failed:', error);
+              });
+          });
+        }
+      } else {
+        document.body.classList.add('extension-mode');
+        document.title = 'Google Notes Extension';
+      }
+    </script>
+  </body>
+</html>

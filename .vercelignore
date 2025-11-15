@@ -8,7 +8,6 @@ dist
 nextjs
 scripts
 create_icons.sh
-tsconfig*.json
 eslint.config.js
 postcss.config.js
 tailwind.config.js
