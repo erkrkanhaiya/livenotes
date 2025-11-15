@@ -148,9 +148,46 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const result = await signInWithEmailAndPassword(auth, email, password);
       console.log('✅ Email authentication successful:', result.user.email);
       analyticsService.trackLogin('email');
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ Error signing in with email:', error);
-      throw error;
+      console.error('Error details:', {
+        code: error?.code,
+        message: error?.message,
+        stack: error?.stack
+      });
+      
+      // Check for Firebase configuration errors first
+      if (error?.message?.includes('Firebase configuration') || error?.message?.includes('environment variables')) {
+        throw new Error('Firebase configuration error. Please check your environment variables.');
+      }
+      
+      // Check for specific Firebase Auth errors
+      if (error?.code === 'auth/invalid-credential' || error?.code === 'auth/wrong-password') {
+        throw new Error('Invalid email or password. Please check your credentials.');
+      } else if (error?.code === 'auth/user-not-found') {
+        throw new Error('No account found with this email address.');
+      } else if (error?.code === 'auth/network-request-failed') {
+        // Check if it's actually a network issue or a configuration issue
+        const isConfigError = error?.message?.includes('Failed to fetch') || 
+                             error?.message?.includes('CORS') ||
+                             error?.message?.includes('ERR_BLOCKED_BY_CLIENT');
+        
+        if (isConfigError) {
+          throw new Error('Connection error. Please check your Firebase configuration and ensure the extension has proper permissions.');
+        } else {
+          throw new Error('Network error. Please check your internet connection and try again.');
+        }
+      } else if (error?.code === 'auth/too-many-requests') {
+        throw new Error('Too many failed attempts. Please try again later.');
+      } else if (error?.code === 'auth/operation-not-allowed') {
+        throw new Error('Email/password authentication is not enabled. Please contact support.');
+      }
+      
+      // Generic error handling
+      if (error?.message) {
+        throw error;
+      }
+      throw new Error('An unexpected error occurred. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -181,9 +218,46 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       console.log('✅ Profile updated with display name:', displayName);
       
       analyticsService.trackSignUp('email');
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ Error creating account:', error);
-      throw error;
+      console.error('Error details:', {
+        code: error?.code,
+        message: error?.message,
+        stack: error?.stack
+      });
+      
+      // Check for Firebase configuration errors first
+      if (error?.message?.includes('Firebase configuration') || error?.message?.includes('environment variables')) {
+        throw new Error('Firebase configuration error. Please check your environment variables.');
+      }
+      
+      // Check for specific Firebase Auth errors
+      if (error?.code === 'auth/email-already-in-use') {
+        throw new Error('An account with this email already exists. Please sign in instead.');
+      } else if (error?.code === 'auth/invalid-email') {
+        throw new Error('Invalid email address. Please enter a valid email.');
+      } else if (error?.code === 'auth/weak-password') {
+        throw new Error('Password is too weak. Please use a stronger password.');
+      } else if (error?.code === 'auth/network-request-failed') {
+        // Check if it's actually a network issue or a configuration issue
+        const isConfigError = error?.message?.includes('Failed to fetch') || 
+                             error?.message?.includes('CORS') ||
+                             error?.message?.includes('ERR_BLOCKED_BY_CLIENT');
+        
+        if (isConfigError) {
+          throw new Error('Connection error. Please check your Firebase configuration and ensure the extension has proper permissions.');
+        } else {
+          throw new Error('Network error. Please check your internet connection and try again.');
+        }
+      } else if (error?.code === 'auth/operation-not-allowed') {
+        throw new Error('Email/password authentication is not enabled. Please contact support.');
+      }
+      
+      // Generic error handling
+      if (error?.message) {
+        throw error;
+      }
+      throw new Error('An unexpected error occurred. Please try again.');
     } finally {
       setIsLoading(false);
     }

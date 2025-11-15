@@ -32,7 +32,11 @@ export class GroupsService {
     userEmail: string,
     userName: string
   ): Promise<Group> {
-    if (!db) throw new Error('Firebase not initialized');
+    if (!db) {
+      const error = new Error('Firebase not initialized. Please check your environment variables.');
+      console.error('❌', error.message);
+      throw error;
+    }
 
     const now = new Date();
     const newGroup = {
@@ -50,21 +54,36 @@ export class GroupsService {
       allowEditing: false,
     };
 
-    const docRef = await addDoc(collection(db, this.COLLECTION), newGroup);
-    
-    return {
-      id: docRef.id,
-      ...newGroup,
-      createdAt: now,
-      updatedAt: now,
-    };
+    try {
+      const docRef = await addDoc(collection(db, this.COLLECTION), newGroup);
+      console.log('✅ Group created in Firestore:', docRef.id);
+      
+      return {
+        id: docRef.id,
+        ...newGroup,
+        createdAt: now,
+        updatedAt: now,
+      };
+    } catch (error: any) {
+      console.error('❌ Error creating group in Firestore:', error);
+      if (error?.code === 'unavailable' || error?.message?.includes('ERR_BLOCKED_BY_CLIENT') || error?.message?.includes('network')) {
+        console.warn('⚠️ Firestore connection blocked. Check:');
+        console.warn('1. Ad blockers may be blocking Firestore requests');
+        console.warn('2. Firebase environment variables may be incorrect');
+        console.warn('3. Firestore security rules may be blocking access');
+      }
+      throw error;
+    }
   }
 
   /**
    * Get all groups for a user
    */
   static async getUserGroups(userId: string): Promise<Group[]> {
-    if (!db) return [];
+    if (!db) {
+      console.warn('⚠️ Firestore not initialized. Returning empty groups array.');
+      return [];
+    }
 
     try {
       const q = query(
@@ -368,18 +387,22 @@ export class GroupsService {
         const existingData = querySnapshot.docs[0].data();
         
         // Update existing shared group
-        await updateDoc(sharedGroupRef, {
+        const updateData: any = {
           shareType: shareType,
           allowEditing: shareType === 'private',
-          // Preserve existing collaborators if switching from private to private
-          collaborators: shareType === 'private' && existingData.collaborators 
-            ? existingData.collaborators 
-            : (shareType === 'private' ? [] : undefined),
-        });
+        };
+        
+        // Only include collaborators field if it's a private group
+        if (shareType === 'private') {
+          updateData.collaborators = existingData.collaborators || [];
+        }
+        // For public groups, we don't include the collaborators field (omit it)
+        
+        await updateDoc(sharedGroupRef, updateData);
       } else {
         // ShareId exists but no shared document found, create new one
         shareId = this.generateShareId();
-        const sharedGroupData = {
+        const sharedGroupData: any = {
           groupId: groupId,
           shareId: shareId,
           shareType: shareType,
@@ -389,15 +412,20 @@ export class GroupsService {
           name: group.name,
           description: group.description || '',
           createdAt: Timestamp.fromDate(new Date()),
-          collaborators: shareType === 'private' ? [] : undefined,
           allowEditing: shareType === 'private',
         };
+        
+        // Only include collaborators field for private groups
+        if (shareType === 'private') {
+          sharedGroupData.collaborators = [];
+        }
+        
         await addDoc(collection(db, this.SHARED_COLLECTION), sharedGroupData);
       }
     } else {
       // First time sharing - create new shared group
       shareId = this.generateShareId();
-      const sharedGroupData = {
+      const sharedGroupData: any = {
         groupId: groupId,
         shareId: shareId,
         shareType: shareType,
@@ -407,9 +435,14 @@ export class GroupsService {
         name: group.name,
         description: group.description || '',
         createdAt: Timestamp.fromDate(new Date()),
-        collaborators: shareType === 'private' ? [] : undefined,
         allowEditing: shareType === 'private',
       };
+      
+      // Only include collaborators field for private groups
+      if (shareType === 'private') {
+        sharedGroupData.collaborators = [];
+      }
+      
       await addDoc(collection(db, this.SHARED_COLLECTION), sharedGroupData);
     }
 

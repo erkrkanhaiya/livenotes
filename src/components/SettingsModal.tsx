@@ -95,14 +95,14 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ onClose }) => {
           {/* Web Version - Only show in extension mode */}
           {!window.location.protocol.startsWith('http') && (
             <button 
-              onClick={() => window.open(import.meta.env.VITE_WEB_APP_URL || 'http://localhost:5174', '_blank')}
+              onClick={() => window.open(import.meta.env.VITE_WEB_APP_URL || 'https://livenote-ruddy.vercel.app', '_blank')}
               className="w-full flex items-center space-x-3 p-3 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors text-left"
             >
               <ExternalLink className="h-5 w-5 text-gray-600 dark:text-gray-400" />
               <div>
                 <span className="text-gray-800 dark:text-white">Web Version</span>
                 <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Open Google Notes in browser
+                  Open Live Notes in browser
                 </p>
               </div>
             </button>
@@ -114,7 +114,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ onClose }) => {
             <div>
               <span className="text-gray-800 dark:text-white">About</span>
               <p className="text-sm text-gray-500 dark:text-gray-400">
-                Google Notes Extension v1.0.0
+                Live Notes Extension v1.0.0
               </p>
             </div>
           </button>

@@ -38,6 +38,9 @@ export interface UpdateNoteData {
   visibility?: 'private' | 'public' | 'community';
   color?: NoteColor;
   isPinned?: boolean;
+  groupId?: string; // Group notes feature - undefined to remove from group
+  isCommunity?: boolean;
+  shareId?: string;
 }
 
 export type NoteColor = 

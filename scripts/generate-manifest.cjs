@@ -10,10 +10,9 @@ config();
 // Generate manifest.json with environment variables
 const manifest = {
   manifest_version: 3,
-  name: "Google Notes Extension",
+  name: "Live Notes",
   description: "A smart note-taking extension with Google authentication, cloud sync, and modern UI",
   version: "1.0.0",
-  key: process.env.VITE_EXTENSION_KEY,
   permissions: [
     "storage",
     "identity",
@@ -21,7 +20,7 @@ const manifest = {
     "tabs"
   ],
   host_permissions: [
-    "http://localhost:*/*",
+    "https://livenote-ruddy.vercel.app/*",
     "https://*.googleapis.com/*",
     "https://*.firebaseapp.com/*",
     "https://*.google.com/*",
@@ -34,13 +33,25 @@ const manifest = {
   ],
   action: {
     default_popup: "index.html",
-    default_title: "Google Notes"
+    default_title: "Live Notes",
+    default_icon: {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  icons: {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
   },
   background: {
     service_worker: "background.js"
   },
   content_security_policy: {
-    extension_pages: "script-src 'self'; object-src 'self'; connect-src 'self' http://localhost:* https://*.googleapis.com https://*.firebaseapp.com wss://*.firebaseapp.com https://www.gstatic.com https://securetoken.googleapis.com https://identitytoolkit.googleapis.com https://firebase.googleapis.com https://*.cloudfunctions.net"
+    extension_pages: "script-src 'self'; object-src 'self'; connect-src 'self' https://livenote-ruddy.vercel.app https://*.googleapis.com https://*.firebaseapp.com wss://*.firebaseapp.com wss://firestore.googleapis.com https://firestore.googleapis.com https://www.gstatic.com https://securetoken.googleapis.com https://identitytoolkit.googleapis.com https://firebase.googleapis.com https://*.cloudfunctions.net wss://livenote-ruddy.vercel.app"
   },
   oauth2: {
     client_id: process.env.VITE_GOOGLE_CLIENT_ID,
@@ -53,6 +64,14 @@ const manifest = {
     }
   ]
 };
+
+// Only include key if it's provided in environment variables
+// For Chrome Web Store, the key should match the one registered in the store
+// If updating an existing extension, use the key from Chrome Web Store dashboard
+// If it's a new extension, you can omit the key (Chrome will assign one)
+if (process.env.VITE_EXTENSION_KEY) {
+  manifest.key = process.env.VITE_EXTENSION_KEY;
+}
 
 // Write manifest to public directory
 const manifestPath = resolve(process.cwd(), 'public/manifest.json');

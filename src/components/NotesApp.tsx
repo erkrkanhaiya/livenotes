@@ -330,7 +330,7 @@ const NotesApp: React.FC = () => {
             <div className={`${isExtension ? 'pt-1.5 pb-1.5 px-2' : 'pt-4 pb-3 px-3'} border-t border-gray-200 dark:border-dark-border`}>
               <button
                 onClick={() => {
-                  const webUrl = import.meta.env.VITE_WEB_APP_URL || 'http://localhost:5174';
+                  const webUrl = import.meta.env.VITE_WEB_APP_URL || 'https://livenote-ruddy.vercel.app/';
                   window.open(webUrl, '_blank');
                 }}
                 className="flex items-center gap-1.5 text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300 transition-colors cursor-pointer"

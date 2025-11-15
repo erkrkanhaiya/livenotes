@@ -404,7 +404,7 @@ const SharedNoteView: React.FC = () => {
             <button
               onClick={handleGoToApp}
               className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
-              title="Go to Google Notes"
+              title="Go to Live Notes"
             >
               <ArrowLeft className="h-5 w-5 text-gray-600 dark:text-gray-400" />
             </button>
@@ -615,7 +615,7 @@ const SharedNoteView: React.FC = () => {
               Create Your Own Notes
             </h3>
             <p className="text-gray-600 dark:text-gray-400 mb-4">
-              Start organizing your thoughts with Google Notes. Create, share, and collaborate on notes easily.
+              Start organizing your thoughts with Live Notes. Create, share, and collaborate on notes easily.
             </p>
             <button
               onClick={handleGoToApp}

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Folder, FolderOpen, MoreVertical, Share2, Trash2, Edit2, Users, Pin, PinOff, LogOut } from 'lucide-react';
+import { Folder, FolderOpen, MoreVertical, Share2, Trash2, Edit2, Users, Pin, PinOff, LogOut, Info, X } from 'lucide-react';
 import type { Group } from '../types';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -75,6 +75,7 @@ const GroupList: React.FC<GroupListProps> = ({
     return a.name.localeCompare(b.name);
   });
   const [showMenuForGroup, setShowMenuForGroup] = useState<string | null>(null);
+  const [showDetailsForGroup, setShowDetailsForGroup] = useState<Group | null>(null);
   const menuRef = React.useRef<HTMLDivElement>(null);
 
   // Close menu when clicking outside
@@ -240,9 +241,21 @@ const GroupList: React.FC<GroupListProps> = ({
                   </>
                 )}
                 
-                {/* Collaborator-only option */}
+                {/* Collaborator-only options */}
                 {isCollaborator(group) && (
                   <>
+                    <div className="border-t border-gray-200 dark:border-gray-600"></div>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setShowDetailsForGroup(group);
+                        setShowMenuForGroup(null);
+                      }}
+                      className="w-full flex items-center space-x-2 px-3 py-2 hover:bg-blue-100 dark:hover:bg-blue-900/20 text-blue-600 dark:text-blue-400 text-left text-sm"
+                    >
+                      <Info className="h-4 w-4" />
+                      <span>Details</span>
+                    </button>
                     <div className="border-t border-gray-200 dark:border-gray-600"></div>
                     <button
                       onClick={(e) => {
@@ -264,6 +277,142 @@ const GroupList: React.FC<GroupListProps> = ({
           </div>
         </div>
       ))}
+
+      {/* Group Details Modal for Collaborators */}
+      {showDetailsForGroup && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-dark-card rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+            {/* Header */}
+            <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-600">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Group Details</h2>
+              <button
+                onClick={() => setShowDetailsForGroup(null)}
+                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+              >
+                <X className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+              </button>
+            </div>
+
+            {/* Content */}
+            <div className="p-4 space-y-4 text-left">
+              {/* Group Name */}
+              <div>
+                <label className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide text-left">
+                  Group Name
+                </label>
+                <p className="text-sm font-semibold text-gray-900 dark:text-white mt-1 text-left">
+                  {showDetailsForGroup.name}
+                </p>
+              </div>
+
+              {/* Description */}
+              {showDetailsForGroup.description && (
+                <div>
+                  <label className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide text-left">
+                    Description
+                  </label>
+                  <p className="text-sm text-gray-700 dark:text-gray-300 mt-1 text-left">
+                    {showDetailsForGroup.description}
+                  </p>
+                </div>
+              )}
+
+              {/* Admin/Owner Information */}
+              <div>
+                <label className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide text-left">
+                  Admin / Owner
+                </label>
+                <div className="mt-2 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center shrink-0">
+                      <span className="text-white font-semibold text-sm">
+                        {showDetailsForGroup.ownerName?.charAt(0)?.toUpperCase() || showDetailsForGroup.ownerEmail?.charAt(0)?.toUpperCase() || 'A'}
+                      </span>
+                    </div>
+                    <div className="flex-1 min-w-0 text-left">
+                      <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">
+                        {showDetailsForGroup.ownerName || 'Admin'}
+                      </p>
+                      <p className="text-xs text-gray-600 dark:text-gray-400 truncate">
+                        {showDetailsForGroup.ownerEmail}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Collaborators List */}
+              {showDetailsForGroup.isShared && showDetailsForGroup.collaborators && showDetailsForGroup.collaborators.length > 0 && (
+                <div>
+                  <label className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2 block text-left">
+                    Collaborators ({showDetailsForGroup.collaborators.length})
+                  </label>
+                  <div className="space-y-2 max-h-48 overflow-y-auto">
+                    {showDetailsForGroup.collaborators.map((collaborator: any, index: number) => (
+                      <div
+                        key={index}
+                        className="flex items-center space-x-3 p-2 bg-gray-50 dark:bg-gray-800 rounded-lg"
+                      >
+                        <div className="w-8 h-8 bg-gray-400 rounded-full flex items-center justify-center">
+                          <span className="text-white font-semibold text-xs">
+                            {(collaborator.email || collaborator.name || 'U').charAt(0).toUpperCase()}
+                          </span>
+                        </div>
+                        <div className="flex-1 min-w-0 text-left">
+                          <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                            {collaborator.name || collaborator.email?.split('@')[0] || 'Collaborator'}
+                          </p>
+                          <p className="text-xs text-gray-600 dark:text-gray-400 truncate">
+                            {collaborator.email}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Share Type */}
+              {showDetailsForGroup.isShared && (
+                <div>
+                  <label className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide text-left">
+                    Share Type
+                  </label>
+                  <p className="text-sm text-gray-700 dark:text-gray-300 mt-1 text-left">
+                    {showDetailsForGroup.shareType === 'public' ? 'Public' : 'Private'}
+                  </p>
+                </div>
+              )}
+
+              {/* Created Date */}
+              <div>
+                <label className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide text-left">
+                  Created
+                </label>
+                <p className="text-sm text-gray-700 dark:text-gray-300 mt-1 text-left">
+                  {showDetailsForGroup.createdAt
+                    ? new Date(showDetailsForGroup.createdAt).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                      })
+                    : 'N/A'}
+                </p>
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="p-4 border-t border-gray-200 dark:border-gray-600 flex justify-end">
+              <button
+                onClick={() => setShowDetailsForGroup(null)}
+                className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors text-sm font-medium"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

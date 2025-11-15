@@ -1,7 +1,7 @@
 // Firebase configuration
-import { initializeApp } from 'firebase/app';
+import { initializeApp, type FirebaseApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
+import { getFirestore, type Firestore } from 'firebase/firestore';
 import { getAnalytics } from 'firebase/analytics';
 import type { Analytics } from 'firebase/analytics';
 import { config } from './env';
@@ -9,8 +9,31 @@ import { config } from './env';
 // Firebase config using environment variables
 const firebaseConfig = config.firebase;
 
+// Validate Firebase config before initialization
+if (!firebaseConfig.apiKey || !firebaseConfig.projectId || !firebaseConfig.authDomain) {
+  console.error('❌ Invalid Firebase configuration. Missing required fields:', {
+    apiKey: !!firebaseConfig.apiKey,
+    projectId: !!firebaseConfig.projectId,
+    authDomain: !!firebaseConfig.authDomain,
+  });
+  throw new Error('Firebase configuration is incomplete. Please check your environment variables.');
+}
+
+console.log('🔧 Initializing Firebase with config:', {
+  projectId: firebaseConfig.projectId,
+  authDomain: firebaseConfig.authDomain,
+  apiKey: firebaseConfig.apiKey ? `${firebaseConfig.apiKey.substring(0, 10)}...` : 'MISSING',
+});
+
 // Initialize Firebase
-const app = initializeApp(firebaseConfig);
+let app: FirebaseApp;
+try {
+  app = initializeApp(firebaseConfig);
+  console.log('✅ Firebase initialized successfully');
+} catch (error) {
+  console.error('❌ Failed to initialize Firebase:', error);
+  throw error;
+}
 
 // Initialize Firebase Authentication and get a reference to the service
 export const auth = getAuth(app);
@@ -41,7 +64,17 @@ googleProvider.setCustomParameters({
 });
 
 // Initialize Cloud Firestore and get a reference to the service
-export const db = getFirestore(app);
+let db: Firestore;
+try {
+  db = getFirestore(app);
+  console.log('✅ Firestore initialized successfully');
+  console.log('📊 Firestore database ready for:', firebaseConfig.projectId);
+} catch (error) {
+  console.error('❌ Failed to initialize Firestore:', error);
+  throw error;
+}
+
+export { db };
 
 // Initialize Firebase Analytics (disabled in Chrome extension environment)
 let analytics: Analytics | null = null;

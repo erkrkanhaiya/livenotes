@@ -1,8 +1,8 @@
 // Chrome Extension Background Script
-console.log('Google Notes Extension background script loaded');
+console.log('Live Notes Extension background script loaded');
 
 chrome.runtime.onInstalled.addListener(() => {
-  console.log('Google Notes Extension installed successfully');
+  console.log('Live Notes Extension installed successfully');
 });
 
 // Keep service worker alive

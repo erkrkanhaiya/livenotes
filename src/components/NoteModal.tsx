@@ -98,7 +98,8 @@ const NoteModal: React.FC<NoteModalProps> = ({ note, onClose }) => {
           description: description.trim(),
           color,
           isPinned,
-          groupId: selectedGroupIdLocal || undefined,
+          // Only include groupId if it's a valid non-empty string
+          ...(selectedGroupIdLocal ? { groupId: selectedGroupIdLocal } : {}),
         };
         await createNote(newNote);
         console.log('✅ Note created successfully');

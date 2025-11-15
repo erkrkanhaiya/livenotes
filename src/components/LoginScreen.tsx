@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { StickyNote, Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff } from 'lucide-react';
 import { getFirebaseErrorMessage } from '../utils/firebaseErrors';
+import ForgotPasswordScreen from './ForgotPasswordScreen';
+import reactLogo from '../assets/react.svg';
 
 const LoginScreen: React.FC = () => {
   const { signInWithGoogle, signInWithEmail, signUpWithEmail, signInAsGuest, isLoading } = useAuth();
@@ -15,6 +17,7 @@ const LoginScreen: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isExtensionContext, setIsExtensionContext] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -165,7 +168,14 @@ const LoginScreen: React.FC = () => {
       } else if (err?.code === 'auth/too-many-requests') {
         setError('❌ Too many failed attempts. Please try again later.');
       } else if (err?.code === 'auth/network-request-failed') {
-        setError('❌ Network error. Please check your internet connection.');
+        // Check if it's a configuration issue
+        if (err?.message?.includes('Failed to fetch') || err?.message?.includes('CORS') || err?.message?.includes('ERR_BLOCKED_BY_CLIENT')) {
+          setError('❌ Connection error. Please check your Firebase configuration. If using an ad blocker, try disabling it.');
+        } else {
+          setError('❌ Network error. Please check your internet connection and try again.');
+        }
+      } else if (err?.message?.includes('Firebase configuration')) {
+        setError('❌ Firebase configuration error. Please check your environment variables.');
       } else {
         setError(`❌ ${errorMessage}`);
       }
@@ -207,7 +217,14 @@ const LoginScreen: React.FC = () => {
       } else if (err?.code === 'auth/operation-not-allowed') {
         setError('❌ Email signup is not enabled. Please contact support.');
       } else if (err?.code === 'auth/network-request-failed') {
-        setError('❌ Network error. Please check your internet connection.');
+        // Check if it's a configuration issue
+        if (err?.message?.includes('Failed to fetch') || err?.message?.includes('CORS') || err?.message?.includes('ERR_BLOCKED_BY_CLIENT')) {
+          setError('❌ Connection error. Please check your Firebase configuration. If using an ad blocker, try disabling it.');
+        } else {
+          setError('❌ Network error. Please check your internet connection and try again.');
+        }
+      } else if (err?.message?.includes('Firebase configuration')) {
+        setError('❌ Firebase configuration error. Please check your environment variables.');
       } else {
         setError(`❌ ${errorMessage}`);
       }
@@ -239,15 +256,20 @@ const LoginScreen: React.FC = () => {
     });
   };
 
+  // Show forgot password screen if requested
+  if (showForgotPassword) {
+    return <ForgotPasswordScreen onBack={() => setShowForgotPassword(false)} />;
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-4">
       <div className="w-full max-w-md bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700">
         {/* Header */}
         <div className="bg-blue-600 dark:bg-blue-700 p-6 text-center rounded-t-lg">
           <div className="inline-flex items-center justify-center w-12 h-12 bg-white/20 rounded-lg mb-3">
-            <StickyNote className="w-6 h-6 text-white" />
+            <img src={reactLogo} alt="Live Notes" className="w-16 h-14" />
           </div>
-          <h1 className="text-xl font-bold text-white mb-1">Google Notes</h1>
+          <h1 className="text-xl font-bold text-white mb-1">Live Notes</h1>
           <p className="text-blue-100 text-sm">Your thoughts, organized beautifully</p>
         </div>
 
@@ -276,7 +298,14 @@ const LoginScreen: React.FC = () => {
                 } else if (err?.code === 'auth/popup-blocked') {
                   setError('❌ Popup blocked. Please allow popups and try again.');
                 } else if (err?.code === 'auth/network-request-failed') {
-                  setError('❌ Network error. Please check your internet connection.');
+                  // Check if it's a configuration issue
+                  if (err?.message?.includes('Failed to fetch') || err?.message?.includes('CORS') || err?.message?.includes('ERR_BLOCKED_BY_CLIENT')) {
+                    setError('❌ Connection error. Please check your Firebase configuration. If using an ad blocker, try disabling it.');
+                  } else {
+                    setError('❌ Network error. Please check your internet connection and try again.');
+                  }
+                } else if (err?.message?.includes('Firebase configuration')) {
+                  setError('❌ Firebase configuration error. Please check your environment variables.');
                 } else {
                   setError(`❌ Google sign-in failed: ${errorMessage}`);
                 }
@@ -435,30 +464,39 @@ const LoginScreen: React.FC = () => {
               )}
             </div>
 
-            {/* Remember Me checkbox - Only show for sign in */}
+            {/* Remember Me and Forgot Password - Only show for sign in */}
             {activeTab === 'signin' && (
-              <div className="flex items-center">
-                <input
-                  type="checkbox"
-                  id="rememberMe"
-                  checked={rememberMe}
-                  onChange={(e) => {
-                    const checked = e.target.checked;
-                    setRememberMe(checked);
-                    
-                    // Clear stored data if unchecked
-                    if (!checked) {
-                      localStorage.removeItem('rememberedEmail');
-                      localStorage.removeItem('rememberedLoginMethod');
-                      console.log('🗑️ Cleared remembered login data');
-                    }
-                  }}
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                  disabled={isLoading}
-                />
-                <label htmlFor="rememberMe" className="ml-2 block text-sm text-gray-700 dark:text-gray-300 text-left">
-                  Remember me
-                </label>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center">
+                  <input
+                    type="checkbox"
+                    id="rememberMe"
+                    checked={rememberMe}
+                    onChange={(e) => {
+                      const checked = e.target.checked;
+                      setRememberMe(checked);
+                      
+                      // Clear stored data if unchecked
+                      if (!checked) {
+                        localStorage.removeItem('rememberedEmail');
+                        localStorage.removeItem('rememberedLoginMethod');
+                        console.log('🗑️ Cleared remembered login data');
+                      }
+                    }}
+                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    disabled={isLoading}
+                  />
+                  <label htmlFor="rememberMe" className="ml-2 block text-sm text-gray-700 dark:text-gray-300 text-left">
+                    Remember me
+                  </label>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowForgotPassword(true)}
+                  className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium"
+                >
+                  Forgot Password?
+                </button>
               </div>
             )}
 
@@ -536,13 +574,13 @@ const LoginScreen: React.FC = () => {
           {isExtensionContext && (
             <div className="mt-6 text-center">
               <button
-                onClick={() => window.open(import.meta.env.VITE_WEB_APP_URL || 'http://localhost:5174', '_blank')}
+                onClick={() => window.open(import.meta.env.VITE_WEB_APP_URL || 'https://livenote-ruddy.vercel.app/', '_blank')}
                 className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 text-sm font-medium underline hover:no-underline transition-colors"
               >
                 🌐 Access Web Version
               </button>
               <p className="text-gray-500 dark:text-gray-400 text-xs mt-1">
-                Use Google Notes in your browser
+                Use Live Notes in your browser
               </p>
             </div>
           )}

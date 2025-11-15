@@ -37,11 +37,12 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({ className = '' 
       user.email,
       (notifications) => {
         setNotifications(notifications);
-      }
+      },
+      user.id
     );
 
     // Also load initial notifications
-    NotificationService.getNotifications(user.email)
+    NotificationService.getNotifications(user.email, 50, user.id)
       .then((notifications) => {
         setNotifications(notifications);
       })

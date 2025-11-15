@@ -9,6 +9,9 @@ export default defineConfig(({ mode }) => {
   // Base configuration
   const config = {
     plugins: [react()],
+    resolve: {
+      dedupe: ['react', 'react-dom'],
+    },
     define: {
       global: 'globalThis',
       __IS_WEB__: JSON.stringify(isWeb),

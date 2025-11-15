@@ -30,7 +30,16 @@ export const NotesProvider: React.FC<NotesProviderProps> = ({ children }) => {
   const [groups, setGroups] = useState<Group[]>([]);
   const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
   
-  const { user } = useAuth();
+  // Safely get auth context - handle case where AuthProvider might not be available
+  let user;
+  try {
+    const authContext = useAuth();
+    user = authContext?.user || null;
+  } catch (err) {
+    // If useAuth throws, AuthProvider is not available
+    console.warn('NotesProvider: AuthProvider not available, user will be null');
+    user = null;
+  }
 
   // Load notes and groups when user changes
   useEffect(() => {
@@ -624,10 +633,12 @@ export const NotesProvider: React.FC<NotesProviderProps> = ({ children }) => {
       const allUpdates = { ...updates, ...sharingUpdates };
       
       // Optimistically update the note in the UI first
-      const optimisticUpdate = {
+      const optimisticUpdate: Note = {
         ...existingNote,
         ...allUpdates,
         updatedAt: new Date(),
+        // Ensure groupId is never null (convert to undefined)
+        groupId: allUpdates.groupId === null || allUpdates.groupId === '' ? undefined : (allUpdates.groupId ?? existingNote.groupId),
       };
       
       setNotes(prev => 
@@ -688,7 +699,7 @@ export const NotesProvider: React.FC<NotesProviderProps> = ({ children }) => {
         }
       }
       
-      // If note belongs to a group, create notifications for group collaborators
+      // If note belongs to a group, create notifications for admin/owner only
       if (existingNote.groupId) {
         try {
           const { default: GroupsService } = await import('../services/groupsService');
@@ -699,8 +710,9 @@ export const NotesProvider: React.FC<NotesProviderProps> = ({ children }) => {
             const editorName = user.displayName || user.email || 'Someone';
             const editorEmail = user.email || '';
             const ownerEmail = group.ownerEmail || '';
+            const ownerId = group.ownerId || '';
             
-            // Only create notification if editor is not the owner
+            // Only create notification if editor is not the owner (collaborator is editing)
             if (editorEmail && ownerEmail && 
                 editorEmail.toLowerCase() !== ownerEmail.toLowerCase()) {
               await NotificationService.createNotification({
@@ -711,9 +723,11 @@ export const NotesProvider: React.FC<NotesProviderProps> = ({ children }) => {
                 actionBy: {
                   name: editorName,
                   email: editorEmail
-                }
+                },
+                userId: ownerId, // Target the owner/admin
+                ownerEmail: ownerEmail // Target the owner/admin
               });
-              console.log('✅ Created notification for group note edit');
+              console.log('✅ Created notification for group note edit (to admin only)');
             }
           }
         } catch (groupNotifError) {

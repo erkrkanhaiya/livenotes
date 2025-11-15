@@ -82,7 +82,7 @@ export const notesService = {
               ...noteData,
               createdAt: noteData.createdAt?.toDate() || new Date(),
               updatedAt: noteData.updatedAt?.toDate() || new Date(),
-              groupId: noteData.groupId || undefined, // Include groupId if present
+              groupId: noteData.groupId || undefined, // Include groupId if present (can be undefined)
             } as Note;
 
             // If this is a community note, fetch community members
@@ -113,8 +113,16 @@ export const notesService = {
       
       // Fallback to local storage
       return this.getLocalNotes(userId);
-    } catch (error) {
-      console.error('Error getting notes from Firebase, falling back to local storage:', error);
+    } catch (error: any) {
+      console.error('❌ Error getting notes from Firebase:', error);
+      if (error?.code === 'unavailable' || error?.message?.includes('ERR_BLOCKED_BY_CLIENT') || error?.message?.includes('network')) {
+        console.warn('⚠️ Firestore connection blocked or unavailable. Check:');
+        console.warn('1. Ad blockers may be blocking Firestore requests');
+        console.warn('2. Firebase environment variables may be incorrect');
+        console.warn('3. Firestore security rules may be blocking access');
+        console.warn('4. Network connectivity issues');
+      }
+      console.log('📦 Falling back to local storage');
       return this.getLocalNotes(userId);
     }
   },
@@ -133,25 +141,43 @@ export const notesService = {
     try {
       // Try Firebase first
       if (db) {
+        // Build Firestore document, excluding undefined values
         const noteDoc: any = {
-          ...newNote,
+          title: newNote.title,
+          description: newNote.description || '',
+          userId: newNote.userId,
+          color: newNote.color || 'yellow',
+          isPinned: newNote.isPinned || false,
           createdAt: Timestamp.fromDate(now),
           updatedAt: Timestamp.fromDate(now),
         };
-        // Only include groupId if it exists
-        if (noteData.groupId) {
+        
+        // Only include groupId if it exists, is not undefined, and is not empty string
+        if (noteData.groupId !== undefined && noteData.groupId !== null && noteData.groupId !== '') {
           noteDoc.groupId = noteData.groupId;
         }
         
-        const docRef = await addDoc(collection(db, NOTES_COLLECTION), noteDoc);
+        // Include other optional fields if they exist
+        if (newNote.isCommunity !== undefined) {
+          noteDoc.isCommunity = newNote.isCommunity;
+        }
+        if (newNote.shareId) {
+          noteDoc.shareId = newNote.shareId;
+        }
         
+        const docRef = await addDoc(collection(db, NOTES_COLLECTION), noteDoc);
+        console.log('✅ Note created in Firestore:', docRef.id);
         return { id: docRef.id, ...newNote };
       }
       
       // Fallback to local storage
+      console.log('📦 Creating note in local storage (Firestore not available)');
       return this.createLocalNote(newNote);
-    } catch (error) {
-      console.error('Error creating note in Firebase, falling back to local storage:', error);
+    } catch (error: any) {
+      console.error('❌ Error creating note in Firebase:', error);
+      if (error?.code === 'unavailable' || error?.message?.includes('ERR_BLOCKED_BY_CLIENT') || error?.message?.includes('network')) {
+        console.warn('⚠️ Firestore connection blocked. Saving to local storage.');
+      }
       return this.createLocalNote(newNote);
     }
   },
@@ -162,10 +188,30 @@ export const notesService = {
       // Try Firebase first
       if (db) {
         const noteRef = doc(db, NOTES_COLLECTION, id);
-        await updateDoc(noteRef, {
-          ...updates,
+        
+        // Filter out undefined values from updates
+        const firestoreUpdates: any = {
           updatedAt: Timestamp.fromDate(new Date()),
-        });
+        };
+        
+        // Only include defined values
+        if (updates.title !== undefined) firestoreUpdates.title = updates.title;
+        if (updates.description !== undefined) firestoreUpdates.description = updates.description;
+        if (updates.color !== undefined) firestoreUpdates.color = updates.color;
+        if (updates.isPinned !== undefined) firestoreUpdates.isPinned = updates.isPinned;
+        if (updates.groupId !== undefined) {
+          // If groupId is explicitly set to empty string, omit it
+          // Firestore doesn't support null, so we omit the field
+          if (updates.groupId === '') {
+            // Omit groupId field (don't include it in the update)
+          } else {
+            firestoreUpdates.groupId = updates.groupId;
+          }
+        }
+        if (updates.isCommunity !== undefined) firestoreUpdates.isCommunity = updates.isCommunity;
+        if (updates.shareId !== undefined) firestoreUpdates.shareId = updates.shareId;
+        
+        await updateDoc(noteRef, firestoreUpdates);
         
         // Try to get the existing note from local storage first
         let existingNote = this.getLocalNote(id);
@@ -189,10 +235,12 @@ export const notesService = {
         }
         
         if (existingNote) {
-          const updatedNote = {
+          const updatedNote: Note = {
             ...existingNote,
             ...updates,
             updatedAt: new Date(),
+            // Ensure groupId is never null (convert to undefined)
+            groupId: updates.groupId === null || updates.groupId === '' ? undefined : (updates.groupId ?? existingNote.groupId),
           };
           
           // Update local storage with the new data
@@ -299,6 +347,8 @@ export const notesService = {
       ...note,
       ...updates,
       updatedAt: new Date(),
+      // Ensure groupId is never null (convert to undefined)
+      groupId: updates.groupId === null || updates.groupId === '' ? undefined : (updates.groupId ?? note.groupId),
     };
     
     console.log('📝 Updated note data:', updatedNote);
