@@ -162,15 +162,32 @@ const LoginScreen: React.FC = () => {
         errorMessage.includes('Incorrect password') ||
         errorMessage.includes('Invalid email or password')
       ) {
-        setError('❌ Login data is incorrect. Please check your email and password.');
+        // Check if error message mentions different Firebase project
+        if (errorMessage.includes('different Firebase project')) {
+          setError('❌ Web app is using a different Firebase project. Please check Vercel environment variables. See WEB_APP_FIREBASE_CHECK.md for details.');
+        } else {
+          setError('❌ Login data is incorrect. Please check your email and password.');
+        }
       } else if (err?.code === 'auth/invalid-email') {
         setError('❌ Please enter a valid email address.');
       } else if (err?.code === 'auth/too-many-requests') {
         setError('❌ Too many failed attempts. Please try again later.');
       } else if (err?.code === 'auth/network-request-failed') {
         // Check if it's a configuration issue
-        if (err?.message?.includes('Failed to fetch') || err?.message?.includes('CORS') || err?.message?.includes('ERR_BLOCKED_BY_CLIENT')) {
-          setError('❌ Connection error. Please check your Firebase configuration. If using an ad blocker, try disabling it.');
+        const isConfigError = err?.message?.includes('Failed to fetch') || 
+                             err?.message?.includes('CORS') || 
+                             err?.message?.includes('ERR_BLOCKED_BY_CLIENT');
+        
+        if (isConfigError) {
+          // Detect if we're in web context
+          const isWebContext = window.location.protocol.startsWith('http');
+          const currentDomain = window.location.hostname;
+          
+          if (isWebContext) {
+            setError(`❌ Connection blocked. Your web domain "${currentDomain}" may not be authorized in Firebase. Please add it to Firebase Console → Authentication → Settings → Authorized domains. See FIREBASE_AUTH_FIX.md for details.`);
+          } else {
+            setError('❌ Connection error. Please check your Firebase configuration. If using an ad blocker, try disabling it.');
+          }
         } else {
           setError('❌ Network error. Please check your internet connection and try again.');
         }
@@ -218,8 +235,20 @@ const LoginScreen: React.FC = () => {
         setError('❌ Email signup is not enabled. Please contact support.');
       } else if (err?.code === 'auth/network-request-failed') {
         // Check if it's a configuration issue
-        if (err?.message?.includes('Failed to fetch') || err?.message?.includes('CORS') || err?.message?.includes('ERR_BLOCKED_BY_CLIENT')) {
-          setError('❌ Connection error. Please check your Firebase configuration. If using an ad blocker, try disabling it.');
+        const isConfigError = err?.message?.includes('Failed to fetch') || 
+                             err?.message?.includes('CORS') || 
+                             err?.message?.includes('ERR_BLOCKED_BY_CLIENT');
+        
+        if (isConfigError) {
+          // Detect if we're in web context
+          const isWebContext = window.location.protocol.startsWith('http');
+          const currentDomain = window.location.hostname;
+          
+          if (isWebContext) {
+            setError(`❌ Connection blocked. Your web domain "${currentDomain}" may not be authorized in Firebase. Please add it to Firebase Console → Authentication → Settings → Authorized domains. See FIREBASE_AUTH_FIX.md for details.`);
+          } else {
+            setError('❌ Connection error. Please check your Firebase configuration. If using an ad blocker, try disabling it.');
+          }
         } else {
           setError('❌ Network error. Please check your internet connection and try again.');
         }

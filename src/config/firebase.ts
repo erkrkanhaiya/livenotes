@@ -23,6 +23,9 @@ console.log('🔧 Initializing Firebase with config:', {
   projectId: firebaseConfig.projectId,
   authDomain: firebaseConfig.authDomain,
   apiKey: firebaseConfig.apiKey ? `${firebaseConfig.apiKey.substring(0, 10)}...` : 'MISSING',
+  appId: firebaseConfig.appId ? `${firebaseConfig.appId.substring(0, 20)}...` : 'MISSING',
+  environment: typeof chrome !== 'undefined' && chrome.runtime ? 'Chrome Extension' : 
+               typeof window !== 'undefined' && window.location.protocol.startsWith('http') ? 'Web App' : 'Unknown'
 });
 
 // Initialize Firebase
@@ -43,8 +46,21 @@ if (typeof chrome !== 'undefined' && chrome.runtime) {
   console.log('🔧 Configuring Firebase Auth for Chrome Extension environment');
   
   // Chrome extensions need special configuration
-  console.log(' Auth Domain:', firebaseConfig.authDomain);
+  console.log('📧 Auth Domain:', firebaseConfig.authDomain);
   console.log('🔑 Project ID:', firebaseConfig.projectId);
+  
+  // Get extension ID for debugging
+  try {
+    const extensionId = (chrome.runtime as any).id;
+    if (extensionId) {
+      console.log('🆔 Extension ID:', extensionId);
+      console.log('⚠️ IMPORTANT: Add this to Firebase Authorized Domains:');
+      console.log(`   chrome-extension://${extensionId}`);
+      console.log('   Go to: Firebase Console → Authentication → Settings → Authorized domains');
+    }
+  } catch (error) {
+    console.warn('⚠️ Could not get extension ID:', error);
+  }
   
   // Ensure proper auth settings for extensions
   try {
@@ -53,6 +69,16 @@ if (typeof chrome !== 'undefined' && chrome.runtime) {
   } catch (error) {
     console.error('❌ Error configuring Firebase Auth for extension:', error);
   }
+} else if (typeof window !== 'undefined' && window.location.protocol.startsWith('http')) {
+  // Web app context
+  console.log('🌐 Configuring Firebase Auth for Web App environment');
+  const currentDomain = window.location.hostname;
+  console.log('📧 Auth Domain:', firebaseConfig.authDomain);
+  console.log('🔑 Project ID:', firebaseConfig.projectId);
+  console.log('🌍 Current Web Domain:', currentDomain);
+  console.log('⚠️ IMPORTANT: Ensure this domain is in Firebase Authorized Domains:');
+  console.log(`   ${currentDomain}`);
+  console.log('   Go to: Firebase Console → Authentication → Settings → Authorized domains');
 }
 
 export const googleProvider = new GoogleAuthProvider();

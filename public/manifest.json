@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Live Notes",
-  "description": "Live Notes is a smart note-taking extension and mobile app, sync your notes across all your devices.",
+  "description": "A smart note-taking extension with Google authentication, cloud sync, and modern UI",
   "version": "1.0.0",
   "permissions": [
     "storage",
@@ -60,5 +60,6 @@
         "<all_urls>"
       ]
     }
-  ]
+  ],
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA8qG/VVjJaQ2eT4n1pjebF1gPJj+/OITEqGbsJcU2kKpcUVp5oFFmhhyYmfYPbywcxzXGwG2uiQQcpjL73/DAFL1yrGd+DIPg7BI/v0Cg7xQM3L6ES/jdCJdUsk3DE0HQXzLhs4jVuzSyVc9eA+lAuVEwEVUOcUMHOXLSbEHF97ZWaubEXL9P0txBaNKsspeKWUB/rhyxu4W+WlkdDJiR/FAw3+zPuMiPOxkvYqsv0p6PkFTp+KP6VMJb6D3fNtp3iEMEYefdJsQ71nuZ91kf25N6l+2u0xEq81OUloy9++MQisRaCAJA6x3Wo3oHrYkvcu+rMUeJUzKJ71VqiFUz/wIDAQAB"
 }
